@@ -92,6 +92,58 @@ TreeNode *get_inorder_successor(TreeNode *root) {
 
 /*Delete a Node in Binary Search Tree*/
 
+TreeNode *delete_bst_opt(TreeNode *root, int val) {
+/* 3 cases are there
+ * a) Node to be deleted is leaf : just delete the Node
+ * b) Node to be deleted has only one child : Copy the Child's data to the Node and delete the child
+ * c) Node to be deleted has two children : Find inorder successor of this node and replace that node and delete the inorder successor
+ */
+
+    if(root == NULL) {
+        return root;
+    }
+
+    if(val < root->data) {
+        root->left = delete_bst_opt(root->left, val);
+    } 
+    else if(val > root->data) {
+        root->right = delete_bst_opt(root->right, val);
+    } else {
+        if(root->left == NULL) {
+            TreeNode *tmp = root->right;
+            free(root);
+            return tmp;
+        } else if(root->right == NULL) {
+            TreeNode *tmp = root->left;
+            free(root);
+            return tmp;
+        }
+        TreeNode *parent = root;
+        TreeNode *succesor = root->right;
+       /* get lowest node from thr right of node to be deleted */
+        while(succesor->left!= NULL) {
+            parent = sucessor;
+            succesor=succesor->left;
+        }
+        
+        // Delete successor. Since successor
+        // is always left child of its parent
+        // we can safely make successor's right
+        // right child as left of its parent.
+        // If there is no succ, then assign
+        // succesor->right to parent->right
+        
+        if(parent != root) {
+            parent->left = succesor->left;
+        } else {
+            parent->right = succesor->right;
+        }
+
+        root->data = succesor->data;
+        free(succesor);
+    }
+    return root;
+}
 TreeNode *delete_bst(TreeNode *root, int val) {
 /* 3 cases are there
  * a) Node to be deleted is leaf : just delete the Node
@@ -152,8 +204,11 @@ int main() {
         printf("%d is found %d times\n", val, numlist);
 /* This is delete bst without optimization */
     for (int i=0; i<numlist; i++) {
-        root = delete_bst(root, val);
+        //root = delete_bst(root, val);
+        root = delete_bst_opt(root, val);
     }
+
+
 
     print_inorder_tree(root);
     
